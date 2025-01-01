@@ -67,6 +67,7 @@ class EduCourseController extends BaseApiController
         if($dbResult){
           \Log::log('ERROR', '新增课程失败');
         }
+        
         return response()->json([
             'code' => 0,
             'message' => 'success',
@@ -74,37 +75,7 @@ class EduCourseController extends BaseApiController
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreEduCourseRequest $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(EduCourse $eduCourse)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(EduCourse $eduCourse)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateEduCourseRequest $request, EduCourse $eduCourse)
-    {
-        //
-    }
 
 
     public function GetCourseByName(Request $request): \Illuminate\Http\JsonResponse
@@ -127,11 +98,7 @@ class EduCourseController extends BaseApiController
                 "sn" => $item['course_sn']
             ];
         }
-        return response()->json([
-            'code' => 0,
-            'message' => 'success',
-            'data' => $list
-        ]);
+        return $this->success($list);
     }
 
 
@@ -159,11 +126,7 @@ class EduCourseController extends BaseApiController
                 'sn'   => $item->st_sn,
             ];
         }
-        return response()->json([
-            'code' => 0,
-            'message' => 'success',
-            'data' => $list
-        ]);
+        return $this->success($list);
     }
 
     public function getStudentCourses(Request $request): \Illuminate\Http\JsonResponse
