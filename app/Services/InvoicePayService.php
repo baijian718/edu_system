@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\EduCourseInvoice;
 use App\Models\EduInvoicePay;
+use DateTime;
 
 class InvoicePayService extends BaseService
 {
@@ -18,6 +19,8 @@ class InvoicePayService extends BaseService
                 }
                 //todo 不相信回调，需要主动去查询
                 $pay['pay_id'] = $data['data']['id'];
+                //这个地方的时区需要转换, 因为没有展示，所以不处理了
+                $pay['pay_at'] = new DateTime($data['data']['paid_at']);
                 return self::paySuccess($pay);
                 break;
             case "charge.update":

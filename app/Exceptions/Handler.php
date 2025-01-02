@@ -73,6 +73,13 @@ class Handler extends ExceptionHandler
                 'error'  => null,
             ]);
         }
-        return parent::render($request, $exception);
+        return  response()->json([
+            'status'  => 'fail',
+            'code'    => $exception->getCode(),
+            'message' => "系统异常，请稍后再试",
+            'data'    => null,
+            'error'   => null,
+        ]);
+        //return parent::render($request, $exception);
     }
 }

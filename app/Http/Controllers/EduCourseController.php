@@ -67,7 +67,7 @@ class EduCourseController extends BaseApiController
         if($dbResult){
           \Log::log('ERROR', '新增课程失败');
         }
-        
+
         return response()->json([
             'code' => 0,
             'message' => 'success',
@@ -131,7 +131,7 @@ class EduCourseController extends BaseApiController
 
     public function getStudentCourses(Request $request): \Illuminate\Http\JsonResponse
     {
-        $studentId = 1;
+        $studentId = $request->user()->id;
         $pageSize = 10;
         $page = 1;
         $model = EduCourseStudent::query()->where('student_id', $studentId);
@@ -157,8 +157,8 @@ class EduCourseController extends BaseApiController
         $rList = [];
         foreach ($list->items() as $item) {
             $tip = [
-                'id'             => $item['student_id'],
-                'create_at'      => $item['created_at'],
+                'id'             => $item['course_id'],
+                'create_at'      => empty($item['created_at']) ? '':(new DateTime($item['created_at']))->format('Y-m-d H:i:s'),
                 'student_id'     => $item['student_id'],
             ];
             if (key_exists($item['student_id'],$studentList)){

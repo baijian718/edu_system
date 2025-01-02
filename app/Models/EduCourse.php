@@ -11,6 +11,12 @@ class EduCourse extends Model
 
     protected $table = 'edu_course';
 
+    protected $fillable = [
+        'id',
+        'course_name',
+        'course_sn',
+    ];
+
     protected static function boot(): void
     {
         parent::boot();

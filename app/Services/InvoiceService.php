@@ -78,7 +78,7 @@ class InvoiceService extends BaseService {
         $description = sprintf("课程:%s 学生：%s",$courseInfo['course_name'],$studentInfo['name']);
 
         $link = OmiseLink::create(array(
-            'amount'      => $invoice['fee'],
+            'amount'      => $invoice['fee']/100,
             'currency'    => 'JPY',
             'title'       => $title,
             'description' => $description,
@@ -97,7 +97,7 @@ class InvoiceService extends BaseService {
        $t = new EduInvoicePay();
        $t['link_id']        = $link['id'];
        $t['title']         = $link['title'];
-       $t['fee']           = $link['amount'];
+       $t['fee']           = $link['amount'] * 100;
        $t['description']   = $link['description'];
        $t['payment_uri']   = $link['payment_uri'];
        $t['currency']      = $link['currency'];

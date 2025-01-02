@@ -46,8 +46,6 @@ class UserStudent extends Authenticatable
     const USER_TYPE_STUDENT = 'student';
     const USER_TYPE_TEACHER = 'teacher';
 
-
-
     protected static function boot(): void
     {
         parent::boot();

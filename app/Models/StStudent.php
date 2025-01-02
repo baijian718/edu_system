@@ -4,10 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string $name
+ */
 class StStudent extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'st_student';
 
@@ -26,7 +31,7 @@ class StStudent extends Model
 
     public static function GetStudentsByIds(array $studentId)
     {
-        return self::whereIn("id",$studentId)
+        return self::withTrashed()->whereIn("id",$studentId)
             ->get()->keyBy('id')->toArray();
 
     }

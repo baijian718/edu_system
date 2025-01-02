@@ -59,7 +59,7 @@ class LoginController extends Controller
             'name' => $name,
             'avatar'=> $avatar,
             'position'=> [
-                'CN' =>  '$title',
+                'CN' =>  $title,
             ]
         ];
         return $this->success($data);
@@ -82,38 +82,4 @@ class LoginController extends Controller
 
         return response()->json(['message' => 'Successfully logged out']);
     }
-
-    public function info(Request $request)
-    {
-        //使用默认的认证器
-        if (!\Auth::guard(User::USER_TYPE_TEACHER)->check()) {
-            return $this->fail(ResponseEnum::CLIENT_HTTP_UNAUTHORIZED);
-        }
-        $user = \Auth::guard(User::USER_TYPE_TEACHER)->user();
-        if($user->tokenCan(User::USER_TYPE_TEACHER)){
-            $guard = \Auth::guard(User::USER_TYPE_TEACHER);
-            $user  = $guard->user();
-            return $this->success([
-                'user' => [
-                    'name' => $user['name'],
-                    'avatar'=> 'https://gw.alipayobjects.com/zos/rmsportal/jZUIxmJycoymBprLOUbT.png',
-                    'position'=> [
-                        'CN' =>  '前端工程师 | 蚂蚁金服-计算服务事业群-VUE平台',
-                    ],
-                ],
-                'roles' => [
-                    ['id'=> 'teacher', 'operation' => ['add', 'edit', 'delete']]
-                ],
-                'permissions' => [
-                    ['id'=> 'course', 'operation' => ['add', 'edit', 'delete']],
-                    ['id'=> 'invoice', 'operation' => ['add', 'edit', 'delete']],
-                ]
-            ]);
-        }
-        if($user->tokenCan(User::USER_TYPE_STUDENT)){
-            return $this->success(['student']);
-        }
-    }
-
-
 }

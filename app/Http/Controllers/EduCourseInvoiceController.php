@@ -15,6 +15,7 @@ use App\Models\EduCourseInvoice;
 use App\Models\StStudent;
 use App\Services\EduCourseInvoiceService;
 use App\Services\InvoiceService;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -39,7 +40,7 @@ class EduCourseInvoiceController extends BaseApiController
 
         //校验基本信息
         $course = EduCourse::find($courseId);
-        $student = StStudent::find($studentId);
+        $student = StStudent::withTrashed()->find($studentId);
         if (empty($course) || empty($student)){
             return $this->fail(ResponseEnum::HTTP_ERROR);
         }
@@ -65,7 +66,9 @@ class EduCourseInvoiceController extends BaseApiController
      */
     public function teacherInvoiceList(TeacherInvoiceListRequest $request): \Illuminate\Http\JsonResponse
     {
-        $model = EduCourseInvoice::query();
+        $pageSize = 10;
+        $page = 1;
+        $model = EduCourseInvoice::query()->offset(($page - 1) * $pageSize);
         /** @var LengthAwarePaginator $data */
         $data =  $model->orderBy('id', 'desc')->paginate(10);
         $courseId   = array_column($data->items(),'course_id');
@@ -78,7 +81,7 @@ class EduCourseInvoiceController extends BaseApiController
                 'id'             => $item['id'],
                 'invoice_status' => $item['invoice_status'],
                 'fee'            => $item['fee'],
-                'create_at'      => $item['created_at'],
+                'create_at'      => empty($item['created_at']) ? '':(new DateTime($item['created_at']))->format('Y-m-d H:i:s'),
                 'student_id'     => $item['student_id'],
             ];
             if (key_exists($item['student_id'],$studentList)){
@@ -128,7 +131,13 @@ class EduCourseInvoiceController extends BaseApiController
 
     public function studentInvoiceList(StudentInvoiceListRequest $request)
     {
-        $model = EduCourseInvoice::query()->whereIn('student_id',[2]);
+        $studentId = $request->user()->id;
+        $pageSize = 10;
+        $page = 1;
+        $model = EduCourseInvoice::query()->offset(($page - 1) * $pageSize);
+        $model = EduCourseInvoice::query()->whereIn('student_id',[$studentId])
+            ->where("invoice_status",EduCourseInvoice::TableInvoiceStatusReady)
+            ->offset(($page - 1) * $pageSize);
         /** @var LengthAwarePaginator $data */
         $data =  $model->orderBy('id', 'desc')->paginate(10);
         $list = InvoiceService::getInvoiceExtraInfo($data->items());
