@@ -1,1 +1,1 @@
-web: ./deploy/entrypoint.sh
+web: chmod +x ./deploy/entrypoint.sh &&  ./deploy/entrypoint.sh
