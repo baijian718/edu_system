@@ -67,7 +67,7 @@ class Handler extends ExceptionHandler
         if ($exception instanceof BusinessException) {
             return response()->json([
                 'status'  => 'fail',
-                'code'    => $exception->getCode(),
+                'code'    => 1,
                 'message' => $exception->getMessage(),
                 'data'    => null,
                 'error'  => null,
@@ -75,7 +75,7 @@ class Handler extends ExceptionHandler
         }
         return  response()->json([
             'status'  => 'fail',
-            'code'    => $exception->getCode(),
+            'code'    => 1,
             'message' => "系统异常，请稍后再试",
             'data'    => null,
             'error'   => null,
