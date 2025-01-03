@@ -60,6 +60,7 @@ class InvoiceService extends BaseService {
 
     public static function CreateOmiseLink(EduCourseInvoice $invoice): bool|string
     {
+        //读取配置，测试的，先这样吧
         define('OMISE_PUBLIC_KEY', 'pkey_test_6296g0oqqwkfd6gu28w');
         define('OMISE_SECRET_KEY', 'skey_test_6296g0p92p57qhaztpi');
         define('OMISE_API_VERSION', '2017-11-02');

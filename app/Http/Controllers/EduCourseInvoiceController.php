@@ -136,7 +136,10 @@ class EduCourseInvoiceController extends BaseApiController
         $page = 1;
         $model = EduCourseInvoice::query()->offset(($page - 1) * $pageSize);
         $model = EduCourseInvoice::query()->whereIn('student_id',[$studentId])
-            ->where("invoice_status",EduCourseInvoice::TableInvoiceStatusReady)
+            ->whereIn("invoice_status",[
+                EduCourseInvoice::TableInvoiceStatusReady,
+                EduCourseInvoice::TableInvoiceStatusSuccess,
+            ])
             ->offset(($page - 1) * $pageSize);
         /** @var LengthAwarePaginator $data */
         $data =  $model->orderBy('id', 'desc')->paginate(10);
