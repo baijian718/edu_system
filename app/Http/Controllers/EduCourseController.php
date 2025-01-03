@@ -50,29 +50,28 @@ class EduCourseController extends BaseApiController
      */
     public function create(Request $request): \Illuminate\Http\JsonResponse
     {
-        $request->validate([
+        $input = $request->validate([
             'name' => 'required|string',
-            'sn'   => 'required|string',
-            'fee'  => 'required|numeric'
+            'sn'   => 'required|string|unique:edu_course,course_sn',
+            'fee'  => 'required|numeric',
+            'month' => 'required|date_format:Ym',
         ]);
-        //todo 校验数据是否重复
+        if (DB::table('edu_course')->where('course_sn', $input['sn'])->exists()) {
+            return response()->json(['error' => '课程编号已存在'], 400);
+        }
         //创建数据
         $dbResult = DB::table('edu_course')->insert([
-            'course_name' => $request->get('name'),
-            'year_month' => $request->get('month'),
-            'fee' => $request->get('fee') * 100,
+            'course_name' => $input['name'],
+            'year_month' => $input['month'],
+            'fee' => $input['fee'] * 100,
             'created_at' => date('Y-m-d H:i:s'),
-            'course_sn' => $request->get('sn')
+            'course_sn' => $input['sn']
         ]);
-        if($dbResult){
+        if(!$dbResult){
           \Log::log('ERROR', '新增课程失败');
+           return $this->fail(ResponseEnum::HTTP_ERROR);
         }
-
-        return response()->json([
-            'code' => 0,
-            'message' => 'success',
-            'data' => []
-        ]);
+        return $this -> success([]);
     }
 
 

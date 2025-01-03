@@ -23,12 +23,13 @@ use Laravel\Passport\Passport;
 Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
 
 
-Route::post('logout', 'App\Http\Controllers\Auth\LoginController@logout');
-Route::post('refresh', 'App\Http\Controllers\Auth\LoginController@refresh');
+
 Route::post('invoice/pay/webhook', 'App\Http\Controllers\EduInvoicePayController@webhooks');
 
 Route::group([],function (){ //根据实际情况来判断是否需要登录
     Route::get('user/info', 'App\Http\Controllers\Auth\LoginController@info');
+    Route::post('logout', 'App\Http\Controllers\Auth\LoginController@logout');
+    Route::post('refresh', 'App\Http\Controllers\Auth\LoginController@refresh');
 });
 
 Route::group(['middleware' => 'auth:teacher'], function () {

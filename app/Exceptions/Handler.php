@@ -76,7 +76,7 @@ class Handler extends ExceptionHandler
         return  response()->json([
             'status'  => 'fail',
             'code'    => 1,
-            'message' => "系统异常，请稍后再试",
+            'message' => $exception->getMessage(),
             'data'    => null,
             'error'   => null,
         ]);
