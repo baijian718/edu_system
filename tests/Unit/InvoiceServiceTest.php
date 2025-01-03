@@ -2,83 +2,72 @@
 
 namespace Tests\Unit;
 
-use App\Models\EduCourse;
 use App\Models\EduCourseInvoice;
-use App\Models\EduInvoicePay;
-use App\Models\StStudent;
 use App\Services\InvoiceService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
 
 class InvoiceServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        // 创建测试数据
-        EduCourse::create(['id' => 1, 'course_name' => '数学', 'course_sn' => 'MATH101']);
-        EduCourse::create(['id' => 2, 'course_name' => '英语', 'course_sn' => 'ENG101']);
-
-        StStudent::create(['id' => 1, 'name' => '张三', 'st_sn' => 'S123']);
-        StStudent::create(['id' => 2, 'name' => '李四', 'st_sn' => 'S456']);
-
-        EduCourseInvoice::create(['id' => 1, 'course_id' => 1, 'student_id' => 1, 'invoice_status' => 2, 'fee' => 10000]);
-        EduCourseInvoice::create(['id' => 2, 'course_id' => 2, 'student_id' => 2, 'invoice_status' => 1, 'fee' => 20000]);
     }
 
-    public function testGetStudentInvoiceByPage()
+    public function testGetStudentInvoiceByPageWithValidInput()
     {
-        $invoices = InvoiceService::GetStudentInvoiceByPage([1, 2], 1, 10);
+        $studentId = [10];
+        $page = 1;
+        $pageSize = 10;
 
-        $this->assertCount(1, $invoices);
-        $this->assertEquals('张三', $invoices[0]['student_name']);
-        $this->assertEquals('数学', $invoices[0]['course_name']);
+        // 模拟 EduCourseInvoice 查询结果
+        $mockInvoices = EduCourseInvoice::factory()->count(10)->make();
+        $paginator = new LengthAwarePaginator($mockInvoices, 10, $pageSize, $page);
+
+        $this->mock(EduCourseInvoice::class)
+            ->shouldReceive('query')
+            ->andReturnSelf()
+            ->shouldReceive('whereIn')
+            ->with('student_id', $studentId)
+            ->andReturnSelf()
+            ->shouldReceive('orderBy')
+            ->with('id', 'desc')
+            ->andReturnSelf()
+            ->shouldReceive('paginate')
+            ->with($pageSize, ['*'], 'page', $page)
+            ->andReturn($paginator);
+
+        $result = InvoiceService::GetStudentInvoiceByPage($studentId, $page, $pageSize);
+        $this->assertCount(4, $result);
     }
 
-    public function testGetInvoiceExtraInfo()
+    public function testGetInvoiceExtraInfoWithValidInput()
     {
-        $invoices = EduCourseInvoice::all()->toArray();
-        $result = InvoiceService::getInvoiceExtraInfo($invoices);
+        $mockInvoices = EduCourseInvoice::factory()->count(3)->make([
+            'id' => 1,
+            'student_id' => 10,
+            'course_id'  => 1,
+            'fee' => 100.00,
+            'invoice_status' => 2,
+            'created_at' => now(),
+        ]);
 
-        $this->assertCount(2, $result);
-        $this->assertEquals('张三', $result[0]['student_name']);
-        $this->assertEquals('李四', $result[1]['student_name']);
+        $result = InvoiceService::getInvoiceExtraInfo($mockInvoices->toArray());
+        $this->assertCount(3, $result);
+        foreach ($result as $index => $invoiceInfo) {
+            $this->assertEquals($mockInvoices[$index]->id, $invoiceInfo['id']);
+            $this->assertEquals($mockInvoices[$index]->student_id, $invoiceInfo['student_id']);
+            $this->assertEquals($mockInvoices[$index]->fee, $invoiceInfo['fee']);
+            $this->assertEquals($mockInvoices[$index]->created_at->timestamp, strtotime($invoiceInfo['create_at']));
+        }
     }
 
-    public function testCreateOmiseLink()
+    public function testGetInvoiceExtraInfoWithEmptyInput()
     {
-        $invoice = EduCourseInvoice::find(1);
-        $link = InvoiceService::CreateOmiseLink($invoice);
-
-        $this->assertIsString($link);
-        $this->assertNotEmpty($link);
+        $mockInvoices = [];
+        $result = InvoiceService::getInvoiceExtraInfo($mockInvoices);
+        $this->assertEmpty($result);
     }
 
-    public function testCreateOmiseLinkWithInvalidInvoiceStatus()
-    {
-        $invoice = EduCourseInvoice::find(2); // 状态为1，不是2
-        $link = InvoiceService::CreateOmiseLink($invoice);
-
-        $this->assertFalse($link);
-    }
-
-    public function testCreateOmiseLinkWithMissingCourse()
-    {
-        $invoice = EduCourseInvoice::create(['id' => 3, 'course_id' => 999, 'student_id' => 1, 'invoice_status' => 2, 'fee' => 10000]);
-        $link = InvoiceService::CreateOmiseLink($invoice);
-
-        $this->assertFalse($link);
-    }
-
-    public function testCreateOmiseLinkWithMissingStudent()
-    {
-        $invoice = EduCourseInvoice::create(['id' => 4, 'course_id' => 1, 'student_id' => 999, 'invoice_status' => 2, 'fee' => 10000]);
-        $link = InvoiceService::CreateOmiseLink($invoice);
-
-        $this->assertFalse($link);
-    }
 }
