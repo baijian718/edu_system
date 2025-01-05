@@ -1,8 +1,9 @@
 <?php
 namespace Tests\Unit;
 
-use App\Models\EduCourseInvoice;
+//use App\Models\EduCourseInvoice;
 use Mockery;
+use Mockery\MockInterface;
 use Tests\TestCase;
 use App\Models\EduInvoicePay;
 use App\Services\InvoicePayService;
@@ -48,13 +49,15 @@ class InvoicePayServiceTest extends TestCase
     {
         $data = $this->getPayWebhookData();
         $pay = $this->getThePayModel();
-        $this->mock(EduInvoicePay::class)
-            ->shouldReceive('findPayByOtherId')
-            ->andReturnSelf()
-            ->with('link_id')->andReturn($pay);
+        $this->mock(EduInvoicePay::class, function (MockInterface $mock) use ($pay) {
+            $mock->shouldReceive('findPayByOtherId')
+                ->andReturnSelf()
+                ->with('link_id')->andReturn($pay);
+        });
 
-        $this->mock(EduInvoicePay::class)
-            -> shouldReceive('paySuccess')->andReturn(true);
+        $this->mock(EduInvoicePay::class,function (MockInterface $mock){
+            $mock -> shouldReceive('paySuccess')->andReturn(true);
+        });
         $result = InvoicePayService::OmisePayWebhook($data);
         $this->assertTrue($result);
     }
@@ -62,10 +65,11 @@ class InvoicePayServiceTest extends TestCase
     public function testOmisePayWebhook_ChargeCreate_PayNotFound()
     {
         $data = $this->getPayWebhookData();
-        $this->mock(EduInvoicePay::class)
-            ->shouldReceive('findPayByOtherId')
-            ->andReturnSelf()
-            ->with('link_id')->andReturn(null);
+        $this->mock(EduInvoicePay::class,function (MockInterface $mock){
+            $mock->shouldReceive('findPayByOtherId')
+                ->andReturnSelf()
+                ->with('link_id')->andReturn(null);
+        });
         $result = InvoicePayService::OmisePayWebhook($data);
         $this->assertFalse($result);
     }

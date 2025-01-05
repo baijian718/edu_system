@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\EduCourseInvoice;
 use App\Services\InvoiceService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class InvoiceServiceTest extends TestCase
@@ -25,19 +26,16 @@ class InvoiceServiceTest extends TestCase
         $mockInvoices = EduCourseInvoice::factory()->count(10)->make();
         $paginator = new LengthAwarePaginator($mockInvoices, 10, $pageSize, $page);
 
-        $this->mock(EduCourseInvoice::class)
-            ->shouldReceive('query')
-            ->andReturnSelf()
-            ->shouldReceive('whereIn')
-            ->with('student_id', $studentId)
-            ->andReturnSelf()
-            ->shouldReceive('orderBy')
-            ->with('id', 'desc')
-            ->andReturnSelf()
-            ->shouldReceive('paginate')
-            ->with($pageSize, ['*'], 'page', $page)
-            ->andReturn($paginator);
-
+        $this->mock('overload:'.EduCourseInvoice::class,function (MockInterface $mock) use($studentId,$pageSize,$paginator,$page){
+            $mock->shouldReceive('query')->andReturnSelf();
+            $mock->shouldReceive('whereIn')->with('student_id', $studentId)
+                ->andReturnSelf();
+            $mock->shouldReceive('orderBy')->with('id', 'desc')
+                ->andReturnSelf();
+            $mock->shouldReceive('paginate')
+                ->with($pageSize, ['*'], 'page', $page)
+                ->andReturn($paginator);
+        });
         $result = InvoiceService::GetStudentInvoiceByPage($studentId, $page, $pageSize);
         $this->assertCount(4, $result);
     }

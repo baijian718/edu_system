@@ -103,14 +103,13 @@ class EduCourseController extends BaseApiController
 
     public function getCourseStudent(Request $request): \Illuminate\Http\JsonResponse
     {
-        $courseId = $request->get('course_id');
+        $input = $request->validate([
+            'course_id' => 'required|integer|min:1',
+        ]);
+        $courseId = $input['course_id'];
         $relation = EduCourseStudent::query()->where('course_id', $courseId)->get();
         if(empty($relation)){
-            return response()->json([
-                'code' => 0,
-                'message' => 'success',
-                'data' => []
-            ]);
+            return $this->success();
         }
         $studentIds = [];
         foreach ($relation as $column){
@@ -203,12 +202,12 @@ class EduCourseController extends BaseApiController
 
     public function deleteCourseStudent(UpdateCourseStudentRequest $request): \Illuminate\Http\JsonResponse
     {
-        $request->validate([
+        $input = $request->validate([
             'course_id' => 'required|integer|min:1',
             'student_id' => 'required|integer|min:1',
         ]);
-        $courseId  = $request->post('course_id');
-        $studentId = $request->post('student_id');
+        $courseId  = $input['course_id'];
+        $studentId = $input['student_id'];
         if (!EduCourseService::deleteCourseStudent($courseId,$studentId)){
             return  $this->fail(ResponseEnum::HTTP_ERROR);
         }

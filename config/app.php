@@ -189,6 +189,9 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Auth' => Illuminate\Support\Facades\Auth::class,
+        'Hash' => Illuminate\Support\Facades\Hash::class,
+
     ])->toArray(),
 
 ];

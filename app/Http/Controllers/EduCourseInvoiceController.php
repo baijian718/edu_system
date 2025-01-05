@@ -29,22 +29,20 @@ class EduCourseInvoiceController extends BaseApiController
      */
     public function create(Request $request): \Illuminate\Http\JsonResponse
     {
-        $request->validate([
+       $input =  $request->validate([
             'course_id' => 'required|integer|min:1',
             'student_id' => 'required|integer|min:1',
             'remark'=> 'string|max:150',
         ]);
-        $courseId = $request->get('course_id');
-        $studentId = $request->get('student_id');
-        $remark = $request->get('remark');
-
+        $courseId = $input['course_id'];
+        $studentId = $input['student_id'];
+        $remark = $input['remark'];
         //校验基本信息
         $course = EduCourse::find($courseId);
         $student = StStudent::withTrashed()->find($studentId);
         if (empty($course) || empty($student)){
             return $this->fail(ResponseEnum::HTTP_ERROR);
         }
-
         try{
             if (EduCourseInvoiceService::createCourseInvoice($course,$student,$remark)){
                 return $this->success([

@@ -9,7 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class StStudentController extends BaseApiController
 {
 
-    public function GetStudentByName(): \Illuminate\Http\JsonResponse
+    public function GetStudentByName()
     {
         $model = StStudent::query();
         /** @var LengthAwarePaginator $data */
