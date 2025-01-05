@@ -109,7 +109,7 @@ class EduCourseController extends BaseApiController
         $courseId = $input['course_id'];
         $relation = EduCourseStudent::query()->where('course_id', $courseId)->get();
         if(empty($relation)){
-            return $this->success();
+            return $this->success([]);
         }
         $studentIds = [];
         foreach ($relation as $column){
